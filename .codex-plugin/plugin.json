@@ -1,6 +1,6 @@
 {
   "name": "beta-movidesk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Consulta dados autorizados do Movidesk por meio de um servidor MCP somente leitura.",
   "author": {
     "name": "thngrns",
