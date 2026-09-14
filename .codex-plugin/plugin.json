@@ -1,6 +1,6 @@
 {
-  "name": "beta-mov",
-  "version": "1.0.0",
+  "name": "beta-movidesk",
+  "version": "1.0.1",
   "description": "Consulta dados autorizados do Movidesk por meio de um servidor MCP somente leitura.",
   "author": {
     "name": "thngrns",
@@ -22,7 +22,7 @@
       "Resuma o histórico de um ticket."
     ],
     "brandColor": "#FF2A28",
-    "composerIcon": "./skills/beta-mov/assets/fundo.png",
-    "logo": "./skills/beta-mov/assets/fundo.png"
+    "composerIcon": "./skills/beta-movidesk/assets/fundo.png",
+    "logo": "./skills/beta-movidesk/assets/fundo.png"
   }
 }
