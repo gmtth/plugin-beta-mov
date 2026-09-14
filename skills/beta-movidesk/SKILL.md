@@ -19,9 +19,9 @@ Use esta skill quando o usuário invocar `@beta-movidesk` ou `$beta-movidesk` pa
 
 - Endpoint: `https://movidesk-oauth-proxy-pkce.thngrns.chatgpt.site/mcp/`
 - Manter a barra final de `/mcp/`.
-- Cliente: `movidesk-mcp-app`.
+- O ChatGPT pode usar o cliente CIMD `https://chatgpt.com/oauth/codex/client.json` ou o cliente legado `movidesk-mcp-app`.
+- O callback pode ser um redirect oficial do ChatGPT ou um callback loopback local no formato `http://127.0.0.1:<porta>/callback`.
 - Escopo: `movidesk:read`.
 - Fluxo: Authorization Code com PKCE S256.
 
 Se a consulta falhar, diferenciar ausência de resultados de erro de autenticação, permissão ou indisponibilidade do serviço. Para detalhes operacionais, consultar a documentação do projeto Movidesk quando ela estiver disponível no contexto.
-
