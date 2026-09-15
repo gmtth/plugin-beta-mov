@@ -1,27 +1,48 @@
 ---
 name: beta-movidesk
-description: Consultar tickets, pessoas e serviços autorizados do Movidesk por meio do MCP Beta MOV, com orientação sobre filtros, paginação, OAuth/PKCE e diagnóstico. Usar quando o usuário pedir consultas ou explicações sobre a integração Movidesk.
+description: Consultar tickets, pessoas e serviços autorizados do Movidesk pelo MCP Beta MOV, escolhendo filtros compatíveis e respostas rápidas. Usar quando o usuário pedir consultas ou análises do Movidesk.
 ---
 
 # Beta MOV
 
-Use esta skill quando o usuário invocar `@beta-movidesk` ou `$beta-movidesk` para consultar o Movidesk.
+Quando o usuário invocar `@beta-movidesk` ou `$beta-movidesk`, use diretamente as ferramentas MCP disponíveis no ambiente. A conexão e o OAuth são responsabilidade do host: não tente descobrir endpoints com navegador, shell ou chamadas HTTP próprias.
 
-## Regras essenciais
+## Escolha da ferramenta
 
-- Operar somente em modo leitura; não prometer alterações de tickets, status, atribuições ou comentários.
-- Escolher a ferramenta MCP mais específica: `movidesk_get_ticket`, `movidesk_search_tickets`, `movidesk_list_open_tickets`, `movidesk_search_people` ou `movidesk_list_services`.
-- Informar os filtros e a paginação aplicados, sem inventar campos ausentes.
-- Usar filtros nomeados antes de filtros OData livres; respeitar `top` de 1 a 100 e `skip` de 0 a 10000.
-- Em falhas de autenticação, orientar nova autorização OAuth. Nunca solicitar ou expor tokens, segredos, Bearer tokens ou códigos de autorização.
+- ID numérico de ticket: `movidesk_get_ticket`.
+- Linha do tempo, resumo ou classificação: use a ferramenta específica, com `ticket_id` ou `protocol`; faça uma única consulta.
+- Busca por assunto, categoria, status, datas ou filtros: `movidesk_search_tickets`.
+- Tickets abertos em uma data: `movidesk_list_open_tickets`.
+- Pessoas: `movidesk_search_people`.
+- Serviços: `movidesk_list_services`.
+- Busca dentro da descrição e interações: `movidesk_search_ticket_content`, somente quando o usuário pedir explicitamente conteúdo textual.
 
-## Conexão MCP
+## Filtros corretos
+
+- Em `movidesk_search_people`, `keyword` não é um filtro de nome enviado ao Movidesk. Para procurar uma pessoa por nome, use `filter` OData, por exemplo `contains(businessName, 'Gedore')`; combine com `active: true` somente se isso fizer sentido para o pedido.
+- Em `movidesk_list_services`, forneça um critério real como `id`, `status`, `category`, `owner_team` ou `filter`; não use `keyword` isoladamente.
+- Em `movidesk_search_ticket_content`, informe `keyword` e pelo menos um escopo fornecido pelo usuário: ticket, protocolo, datas, status, cliente, categoria, serviço, responsável ou `filter`. Não invente intervalos temporais para evitar perguntar.
+- Para uma palavra que provavelmente está no assunto ou categoria, tente primeiro `movidesk_search_tickets` com `keyword` e `top: 25`. Use a busca de conteúdo somente se isso não atender ao pedido.
+- Use `top: 25` por padrão; use até 100 somente quando o usuário pedir uma lista ampla. Use `skip` apenas para paginação solicitada.
+
+## Velocidade e tentativas
+
+- Faça a menor consulta que responde ao pedido. Não execute automaticamente buscas em pessoas, tickets e conteúdo ao mesmo tempo se o usuário não pediu todas.
+- Consultas independentes e explicitamente pedidas podem ser feitas em paralelo, mantendo cada uma limitada.
+- Após `search_criteria_required`, corrija adicionando o filtro compatível; não repita a mesma chamada.
+- Após HTTP 502/503 ou indisponibilidade, informe a falha e pare. Não faça várias tentativas automáticas.
+- Não anuncie plano, conexão, diagnóstico ou cada tentativa. Entregue apenas o resultado, os filtros relevantes e a limitação encontrada.
+
+## Segurança e resposta
+
+- Operar somente em leitura. Nunca prometer alteração de tickets, status, atribuições ou comentários.
+- Se retornar 401/invalid_token, informe que é necessário reconectar o MCP pelo ChatGPT. Nunca solicite ou exponha tokens, segredos, Bearer tokens ou códigos OAuth.
+- Diferencie claramente nenhum resultado, filtro inválido, falta de permissão e indisponibilidade.
+- Não invente dados ausentes nem faça inferências além do conteúdo retornado pelo Movidesk.
+
+## Configuração de referência
 
 - Endpoint: `https://movidesk-oauth-proxy-pkce.thngrns.chatgpt.site/mcp/`
 - Manter a barra final de `/mcp/`.
-- O ChatGPT pode usar o cliente CIMD `https://chatgpt.com/oauth/codex/client.json` ou o cliente legado `movidesk-mcp-app`.
-- O callback pode ser um redirect oficial do ChatGPT ou um callback loopback local no formato `http://127.0.0.1:<porta>/callback`.
 - Escopo: `movidesk:read`.
 - Fluxo: Authorization Code com PKCE S256.
-
-Se a consulta falhar, diferenciar ausência de resultados de erro de autenticação, permissão ou indisponibilidade do serviço. Para detalhes operacionais, consultar a documentação do projeto Movidesk quando ela estiver disponível no contexto.
